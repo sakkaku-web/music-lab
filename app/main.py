@@ -51,9 +51,9 @@ def auto_register_api(bp: APIBlueprint):
             api_file = os.path.join(root, file)
             rule = re.split(r"app|.py", api_file)[1]
             api_route = ".".join(rule.split(os.sep)).strip(".")
-            print(api_route)
             api = importlib.import_module('app.' + api_route)
             try:
+                print(f'Registering api: {api_route}')
                 bp.register_api(api.api)
             except AttributeError:
                 print(f"Failed to register api: {api_route}")
