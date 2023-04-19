@@ -61,14 +61,16 @@ class MusicErrorResponse(BaseModel):
     message: str
 
 
-@api.get('/download/<file>', responses={'200': None, '400': MusicErrorResponse})
+@api.get('/download/<file>',
+         responses={'404': MusicErrorResponse},
+         extra_responses={"200": {"content": {"application/octet-stream": {"schema": {"type": "file"}}}}})
 def music_download(path: MusicDownloadPath):
     file = _join_music_folder(path.file)
 
     if not os.path.exists(file):
-        return MusicErrorResponse(message=f'File not found: {file}').dict(), 400
+        return MusicErrorResponse(message=f'File not found: {file}').dict(), 404
 
     if os.path.isdir(file):
-        return MusicErrorResponse(message=f'File is a folder: {file}').dict(), 400
+        return MusicErrorResponse(message=f'File is a folder: {file}').dict(), 404
 
     return send_file(file, as_attachment=True)
