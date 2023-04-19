@@ -47,15 +47,18 @@ def update_tag(path: TagUpdatePath, body: TagDto):
 
 @api.post('/tag')
 def update_music_tag(body: MusicTagBody):
-    if not music_service.tag_music(body.tag, body.file):
-        return {'message': 'file not found'}, 404
+    error = music_service.tag_music(body.tag, body.file)
+    if error:
+        return {'message': error}, 404
+
     return {'success': 'Success'}, 200
 
 
 @api.delete('/tag')
 def delete_music_tag(body: MusicUnTagBody):
-    if not music_service.untag_music(body.tag, body.file):
-        return {'message': 'file not found'}, 404
+    error = music_service.untag_music(body.tag, body.file)
+    if error:
+        return {'message': error}, 404
     return {'success': 'Success'}, 200
 
 

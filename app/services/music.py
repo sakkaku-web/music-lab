@@ -19,12 +19,13 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     color = db.Column(db.String(6), nullable=False)
+    music = db.relationship('Music', secondary=tags, back_populates='tags')
 
 
 class Music(db.Model):
     __tablename__ = 'music'
     file = db.Column(db.String, primary_key=True)
-    tags = db.relationship('Tag', secondary=tags)
+    tags = db.relationship('Tag', secondary=tags, back_populates='music')
 
 # Dto
 
@@ -117,36 +118,56 @@ class MusicService:
 
     def tag_music(self, tag: TagDto, file: str):
         if self._join_music_folder(file) is None:
-            return False
+            return 'File not found'
 
         id = self._to_music_id(file)
         music = self._get_music(id)
         if music is None:
             music = Music(file=id)
             db.session.add(music)
+            print(f'Creating new music {music.file}')
 
         if tag.id is None:
             tag = Tag(name=tag.name, color=tag.color or 'FFF')
             db.session.add(tag)
+            print(f'Creating new tag {tag.name}')
+        else:
+            tag = self._get_tag(tag.id)
+
+        if tag is None:
+            return 'Tag not found'
 
         music.tags.append(tag)
         db.session.commit()
 
-        return True
+        return None
 
     def untag_music(self, tag: int, file: str):
         if self._join_music_folder(file) is None:
-            return False
+            return 'File not found'
 
         id = self._to_music_id(file)
         music = self._get_music(id)
         if music is None:
-            return False
+            return 'Music not found'
 
         music.tags = [t for t in music.tags if t.id != tag]
+        self._delete_tag_if_empty(tag)
+
         db.session.commit()
 
-        return True
+        return None
+
+    def _delete_tag_if_empty(self, tag: int):
+        tag = self._get_tag(tag)
+        if tag is None:
+            return
+
+        if len(tag.music) > 0:
+            return
+
+        print(f'Delete empty tag {tag.name}')
+        db.session.delete(tag)
 
     def _get_tag(self, id: int) -> TagDto:
         return Tag.query.filter_by(id=id).first()
