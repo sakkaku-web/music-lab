@@ -1,11 +1,9 @@
 from pydantic import BaseModel, Field
 from flask_openapi3 import APIBlueprint
+from flask import send_file
+import os
 
 from app.config import music_tag
-import requests
-
-from enum import Enum
-import os
 
 api = APIBlueprint('music', __name__, url_prefix='/music',
                    abp_tags=[music_tag])
@@ -35,14 +33,21 @@ def _is_folder(parent: str, file: str):
 
 def _list_files_of(parent: str):
     files = os.listdir(parent)
-    return [MusicResponse(parent=parent, file=file,
+    return [MusicResponse(parent=parent[len(MUSIC_FOLDER):], file=file,
                           is_folder=_is_folder(parent, file)) for file in files]
+
+
+def _join_music_folder(path: str):
+    return os.path.join(MUSIC_FOLDER, path)
 
 
 @api.get('/', responses={'200': MusicListResponse})
 def music_list(query: MusicQuery):
     sub = query.folder or ''
-    full_path = os.path.join(MUSIC_FOLDER, sub)
-    music = _list_files_of(parent=full_path)
+    full_path = _join_music_folder(sub)
+    music = []
+
+    if os.path.exists(full_path) and os.path.isdir(full_path):
+        music = _list_files_of(parent=full_path)
 
     return MusicListResponse(music=music).dict()
