@@ -7,10 +7,13 @@ import os
 import re
 import importlib
 
-import app.api.music as music
+from app.db import db
 
 info = Info(title='Music Lab', version='0.0.1')
 app = OpenAPI(__name__, info=info)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+db.init_app(app)
 
 origin = '*' if os.getenv('FLASK_ENV') != 'development' else '*'
 print('CORS origin: ' + origin)
@@ -61,3 +64,8 @@ def auto_register_api(bp: APIBlueprint):
 
 auto_register_api(api)
 app.register_api(api)
+
+
+with app.app_context():
+    # db.create_all()
+    db.reflect()

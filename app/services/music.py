@@ -1,21 +1,45 @@
 from pydantic import BaseModel, Field
+from typing import Optional
+from app.db import db
 import os
 
 # Entity
 
 
-class Music:
-    id: int
-    file: str
-    tags: list[str]
+tags = db.Table('music_tags',
+                db.Column('tag_id', db.Integer, db.ForeignKey(
+                    'tag.id'), primary_key=True),
+                db.Column('music_id', db.String, db.ForeignKey(
+                    'music.file'), primary_key=True)
+                )
+
+
+class Tag(db.Model):
+    __tablename__ = 'tag'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), nullable=False)
+    color = db.Column(db.String(6), nullable=False)
+
+
+class Music(db.Model):
+    __tablename__ = 'music'
+    file = db.Column(db.String, primary_key=True)
+    tags = db.relationship('Tag', secondary=tags)
 
 # Dto
+
+
+class TagDto(BaseModel):
+    id: Optional[int]
+    name: str = Field(None, min_length=1, max_length=20)
+    color: Optional[str] = Field(None, min_length=3, max_length=6)
 
 
 class MusicItemDto(BaseModel):
     parent: str
     file: str
     is_folder: bool
+    tags: list[TagDto] = Field(None, description="tags of music")
 
 # Service
 
@@ -32,17 +56,41 @@ class MusicService:
 
     def _list_files_of(self, parent: str):
         files = os.listdir(parent)
-        return [MusicItemDto(parent=self._remove_music_folder_prefix(parent), file=file,
-                             is_folder=self._is_folder(parent, file)) for file in files]
+        result = []
+
+        for file in files:
+            p = self._remove_music_folder_prefix(parent)
+            music_file = self._to_music_id(os.path.join(p, file))
+            music = self._get_music(music_file)
+            tags = [self._to_tag_dto(tag)
+                    for tag in music.tags] if music else []
+
+            result.append(MusicItemDto(parent=p, file=file,
+                                       is_folder=self._is_folder(parent, file), tags=tags))
+
+        return result
+
+    def _to_music_id(self, file: str):
+        if file.startswith(self.music_folder):
+            file = file[len(self.music_folder):]
+        if file.startswith('/'):
+            file = file[1:]
+        return file
 
     def _join_music_folder(self, path: str):
-        return os.path.join(self.music_folder, path)
+        if not path.startswith(self.music_folder):
+            path = os.path.join(self.music_folder, path)
+
+        if not os.path.exists(path):
+            return None
+
+        return path
 
     def list(self, folder: str = None) -> list[MusicItemDto]:
         full_path = self._join_music_folder(folder or '')
         music = []
 
-        if os.path.exists(full_path) and os.path.isdir(full_path):
+        if full_path and os.path.isdir(full_path):
             music = self._list_files_of(parent=full_path)
 
         return music
@@ -50,7 +98,63 @@ class MusicService:
     def download(self, file: str) -> str:
         full_path = self._join_music_folder(file)
 
-        if os.path.exists(full_path) and os.path.isfile(full_path):
+        if full_path and os.path.isfile(full_path):
             return full_path
 
         return None
+
+    # DB
+    def update_tag(self, t: TagDto):
+        tag = self._get_tag(t.id)
+        if tag is None:
+            return False
+
+        tag.name = t.name
+        tag.color = t.color
+        db.session.commit()
+
+        return True
+
+    def tag_music(self, tag: TagDto, file: str):
+        if self._join_music_folder(file) is None:
+            return False
+
+        id = self._to_music_id(file)
+        music = self._get_music(id)
+        if music is None:
+            music = Music(file=id)
+            db.session.add(music)
+
+        if tag.id is None:
+            tag = Tag(name=tag.name, color=tag.color or 'FFF')
+            db.session.add(tag)
+
+        music.tags.append(tag)
+        db.session.commit()
+
+        return True
+
+    def untag_music(self, tag: int, file: str):
+        if self._join_music_folder(file) is None:
+            return False
+
+        id = self._to_music_id(file)
+        music = self._get_music(id)
+        if music is None:
+            return False
+
+        music.tags = [t for t in music.tags if t.id != tag]
+        db.session.commit()
+
+        return True
+
+    def _get_tag(self, id: int) -> TagDto:
+        return Tag.query.filter_by(id=id).first()
+
+    def _get_music(self, file: str) -> Music:
+        return Music.query.filter_by(file=file).first()
+
+    # Mapper
+
+    def _to_tag_dto(self, tag: Tag) -> TagDto:
+        return TagDto(id=tag.id, name=tag.name, color=tag.color)

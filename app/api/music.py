@@ -4,7 +4,7 @@ from flask import send_file
 import os
 
 from app.config import music_tag
-from app.services.music import MusicItemDto, MusicService
+from app.services.music import MusicItemDto, TagDto, MusicService
 
 api = APIBlueprint('music', __name__, url_prefix='/music',
                    abp_tags=[music_tag])
@@ -21,6 +21,42 @@ class MusicQuery(BaseModel):
 
 class MusicListResponse(BaseModel):
     music: list[MusicItemDto]
+
+
+class MusicTagBody(BaseModel):
+    file: str
+    tag: TagDto
+
+
+class MusicUnTagBody(BaseModel):
+    file: str
+    tag: int
+
+
+class TagUpdatePath(BaseModel):
+    id: int
+
+
+@api.put('/tag/<int:id>', responses={'200': TagDto})
+def update_tag(path: TagUpdatePath, body: TagDto):
+    body.id = path.id
+    music_service.update_tag(body)
+
+    return {'success': 'Success'}, 200
+
+
+@api.post('/tag')
+def update_music_tag(body: MusicTagBody):
+    if not music_service.tag_music(body.tag, body.file):
+        return {'message': 'file not found'}, 404
+    return {'success': 'Success'}, 200
+
+
+@api.delete('/tag')
+def delete_music_tag(body: MusicUnTagBody):
+    if not music_service.untag_music(body.tag, body.file):
+        return {'message': 'file not found'}, 404
+    return {'success': 'Success'}, 200
 
 
 @api.get('/', responses={'200': MusicListResponse})
