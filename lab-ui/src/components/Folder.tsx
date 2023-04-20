@@ -29,7 +29,7 @@ export function Folder({ parent, name, itemMap, onExpand }: FolderProps) {
       <button onClick={() => toggleExpanded()} className="flex gap-2 items-center">
         {expanded ? <FcExpand /> : <FcNext />}
 
-        <span>{name}</span>
+        <span>{name || "/"}</span>
       </button>
 
       {expanded && items.length > 0 && (

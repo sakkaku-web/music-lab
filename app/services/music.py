@@ -53,7 +53,10 @@ class MusicService:
         return os.path.isdir(os.path.join(parent, file))
 
     def _remove_music_folder_prefix(self, path: str):
-        return path[len(self.music_folder):]
+        path = path[len(self.music_folder):]
+        if path.startswith('/'):
+            path = path[1:]
+        return path
 
     def _list_files_of(self, parent: str):
         files = os.listdir(parent)
@@ -79,9 +82,16 @@ class MusicService:
         return file
 
     def _join_music_folder(self, path: str):
+        if path.startswith('/'):
+            path = path[1:]
+
         if not path.startswith(self.music_folder):
             path = os.path.join(self.music_folder, path)
 
+        if path.endswith('/'):
+            path = path[:-1]
+
+        print(f'To: {path}')
         if not os.path.exists(path):
             return None
 
