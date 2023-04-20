@@ -1,0 +1,13 @@
+.openapi-generator-ignore
+apis/MusicApi.ts
+apis/index.ts
+index.ts
+models/MusicErrorResponse.ts
+models/MusicItemDto.ts
+models/MusicListResponse.ts
+models/MusicTagBody.ts
+models/MusicUnTagBody.ts
+models/TagDto.ts
+models/UnprocessableEntity.ts
+models/index.ts
+runtime.ts
