@@ -3,21 +3,26 @@ import { FcExpand, FcNext } from "react-icons/fc";
 import { MusicItemDto } from "../openapi";
 
 interface FolderProps {
+  parent?: string;
   name: string;
-  items: MusicItemDto[];
-  onExpand?: (expanded: boolean) => void;
+  itemMap: Record<string, MusicItemDto[]>;
+  onExpand?: (folder: string) => void;
 }
 
-export function Folder({ name, items, onExpand }: FolderProps) {
+export function Folder({ parent, name, itemMap, onExpand }: FolderProps) {
   const [expanded, setExpanded] = useState(false);
+
+  const fullPath = parent ? `${parent}/${name}` : name;
 
   const toggleExpanded = () => {
     const newExpanded = !expanded;
     setExpanded(newExpanded);
-    if (onExpand) {
-      onExpand(newExpanded);
+    if (onExpand && newExpanded) {
+      onExpand(fullPath);
     }
   };
+
+  const items = itemMap[name] || [];
 
   return (
     <div className="flex flex-col gap-2">
@@ -27,11 +32,15 @@ export function Folder({ name, items, onExpand }: FolderProps) {
         <span>{name}</span>
       </button>
 
-      {expanded && (
+      {expanded && items.length > 0 && (
         <ul className="p-2">
           {items.map((item) => (
             <li key={item.file} className="p-1">
-              {item.isFolder ? <Folder name={item.file} items={[]} /> : item.file}
+              {item.isFolder ? (
+                <Folder name={item.file} parent={fullPath} itemMap={itemMap} onExpand={onExpand} />
+              ) : (
+                item.file
+              )}
             </li>
           ))}
         </ul>

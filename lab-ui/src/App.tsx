@@ -9,16 +9,25 @@ function App() {
   const [music, setMusic] = useState({} as Record<string, MusicItemDto[]>);
 
   useEffect(() => {
-    api.musicListGet().then((response) => {
-      setMusic(groupBy(response.music, (item) => item.parent));
-    });
-  });
+    onExpand("");
+  }, []);
 
-  const root = "/";
+  const onExpand = (folder: string) => {
+    if (!music[folder]) {
+      api
+        .musicListGet({ folder })
+        .then((response) => {
+          setMusic(groupBy(response.music, (item) => item.parent));
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  };
 
   return (
     <div className="p-4">
-      <Folder name={root} items={music[root] || []} />
+      <Folder name="/" itemMap={music} onExpand={onExpand} />
     </div>
   );
 }
