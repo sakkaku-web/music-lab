@@ -87,14 +87,25 @@ class MusicService:
 
         return path
 
-    def list(self, folder: str = None) -> list[MusicItemDto]:
+    def list_music(self, folder: str = None, tag_ids: list[int] = []) -> list[MusicItemDto]:
+        if len(tag_ids) > 0:
+            result, tags = self._get_music_with_tags(tag_ids)
+            return [self._to_music_item_dto(x, tags) for x in result]
+
         full_path = self._join_music_folder(folder or '')
         music = []
-
         if full_path and os.path.isdir(full_path):
             music = self._list_files_of(parent=full_path)
 
         return music
+
+    def _get_music_with_tags(self, tag_ids: list[int]) -> list[Music]:
+        tags = [self._get_tag(tag) for tag in tag_ids]
+        result = []
+        for tag in tags:
+            if tag:
+                result.extend(tag.music)
+        return result, [self._to_tag_dto(t) for t in tags]
 
     def download(self, file: str) -> str:
         full_path = self._join_music_folder(file)
@@ -179,3 +190,6 @@ class MusicService:
 
     def _to_tag_dto(self, tag: Tag) -> TagDto:
         return TagDto(id=tag.id, name=tag.name, color=tag.color)
+
+    def _to_music_item_dto(self, music: Music, tags: list[TagDto]) -> MusicItemDto:
+        return MusicItemDto(parent=os.path.dirname(music.file), is_folder=False, file=os.path.basename(music.file), tags=tags)

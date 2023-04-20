@@ -15,8 +15,7 @@ music_service = MusicService(MUSIC_FOLDER)
 
 class MusicQuery(BaseModel):
     folder: str = Field(None, description="search music inside folder")
-    name: str = Field(
-        None, description="search music file by name recursively")  # TODO: implement
+    tags: list[int] = Field(None, description="search music by tags")
 
 
 class MusicListResponse(BaseModel):
@@ -64,7 +63,7 @@ def delete_music_tag(body: MusicUnTagBody):
 
 @api.get('/', responses={'200': MusicListResponse})
 def music_list(query: MusicQuery):
-    music = music_service.list(folder=query.folder)
+    music = music_service.list_music(folder=query.folder, tag_ids=query.tags)
     return MusicListResponse(music=music).dict()
 
 
