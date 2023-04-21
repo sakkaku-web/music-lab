@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { TagDto } from "../openapi";
-import { SketchPicker, TwitterPicker } from "react-color";
+import { TwitterPicker } from "react-color";
 
 interface ChipProps {
   tag?: TagDto;
   edit?: boolean;
+  editable?: boolean;
   onEdit?: (tag: TagDto) => void;
   onCancel?: () => void;
   onClick?: () => void;
+  small?: boolean;
 }
 
 function hexToRgb(hex: string) {
@@ -21,7 +23,15 @@ function hexToRgb(hex: string) {
     : { r: 0, g: 0, b: 0 };
 }
 
-export function Chip({ tag, edit, onEdit, onCancel, onClick }: ChipProps) {
+export function Chip({
+  tag,
+  edit,
+  editable = true,
+  small = false,
+  onEdit,
+  onCancel,
+  onClick,
+}: ChipProps) {
   const [editName, setEditName] = useState(tag?.name || "");
   const [editColor, setEditColor] = useState(`#${tag?.color || "000000"}`);
   const [openPicker, setOpenPicker] = useState(false);
@@ -32,14 +42,18 @@ export function Chip({ tag, edit, onEdit, onCancel, onClick }: ChipProps) {
   const white = "#F0F0F0";
   const textColor = colorRgb.r < 128 || colorRgb.g < 128 ? white : black;
 
+  const isEditOpen = editable && edit;
+
   // TODO: clickable when name is empty
   return (
     <div
       style={{ background: editColor, color: textColor }}
-      className="text-slate-900 rounded-full px-2 py-1 flex gap-2 min-w-[5rem]"
+      className={`text-slate-900 rounded-full flex gap-2 justify-center cursor-pointer min-w-[3rem] ${
+        small ? "text-small px-2" : "px-2 py-1"
+      }`}
       onClick={onClick}
     >
-      {(edit && (
+      {(isEditOpen && (
         <>
           <input
             autoFocus
@@ -77,8 +91,7 @@ export function Chip({ tag, edit, onEdit, onCancel, onClick }: ChipProps) {
           <button onClick={onCancel}>x</button>
         </>
       )) ||
-        tag?.name ||
-        ""}
+        tag?.name}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { MusicItemDto } from "../openapi";
 import { MusicApiContext } from "../music";
 import { Dialog } from "./Dialog";
 import { File } from "./File";
+import { FileIcon } from "./FileIcon";
+import { Chip } from "./Chip";
 
 interface FolderProps {
   parent?: string;
@@ -59,12 +61,16 @@ export function Folder({ parent, name }: FolderProps) {
             item.isFolder ? (
               <Folder key={item.file} name={item.file} parent={fullPath} />
             ) : (
-              <li
-                key={item.file}
-                className="p-2 cursor-pointer"
-                onClick={() => onFileClick && onFileClick(item)}
-              >
-                {item.file}
+              <li key={item.file} className="flex items-center gap-2">
+                <span
+                  className="flex gap-2 items-center cursor-pointer p-2"
+                  onClick={() => onFileClick && onFileClick(item)}
+                >
+                  <FileIcon file={item.file} /> {item.file}{" "}
+                </span>
+                {item.tags?.map((tag) => (
+                  <Chip key={tag.id} editable={false} small={true} tag={tag} />
+                ))}
               </li>
             )
           )}
