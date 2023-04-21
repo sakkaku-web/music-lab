@@ -39,26 +39,26 @@ class TagUpdatePath(BaseModel):
 @api.put('/tag/<int:id>', responses={'200': TagDto})
 def update_tag(path: TagUpdatePath, body: TagDto):
     body.id = path.id
-    music_service.update_tag(body)
+    try:
+        return music_service.update_tag(body).dict()
+    except Exception as error:
+        return {'message': error.args}, 404
 
-    return {'success': 'Success'}, 200
 
-
-@api.post('/tag')
+@api.post('/tag', responses={'200': MusicItemDto})
 def update_music_tag(body: MusicTagBody):
-    error = music_service.tag_music(body.tag, body.file)
-    if error:
-        return {'message': error}, 404
+    try:
+        return music_service.tag_music(body.tag, body.file).dict()
+    except Exception as error:
+        return {'message': error.args}, 404
 
-    return {'success': 'Success'}, 200
 
-
-@api.delete('/tag')
+@api.delete('/tag', responses={'200': MusicItemDto})
 def delete_music_tag(body: MusicUnTagBody):
-    error = music_service.untag_music(body.tag, body.file)
-    if error:
-        return {'message': error}, 404
-    return {'success': 'Success'}, 200
+    try:
+        return music_service.untag_music(body.tag, body.file).dict()
+    except Exception as error:
+        return {'message': error.args}, 404
 
 
 @api.get('/', responses={'200': MusicListResponse})

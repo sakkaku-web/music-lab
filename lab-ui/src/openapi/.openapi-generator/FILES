@@ -1,4 +1,3 @@
-.openapi-generator-ignore
 apis/MusicApi.ts
 apis/index.ts
 index.ts

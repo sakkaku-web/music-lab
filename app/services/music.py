@@ -99,8 +99,8 @@ class MusicService:
 
     def list_music(self, folder: str = None, tag_ids: list[int] = []) -> list[MusicItemDto]:
         if len(tag_ids) > 0:
-            result, tags = self._get_music_with_tags(tag_ids)
-            return [self._to_music_item_dto(x, tags) for x in result]
+            result = self._get_music_with_tags(tag_ids)
+            return [self._to_music_item_dto(x) for x in result]
 
         full_path = self._join_music_folder(folder or '')
         music = []
@@ -115,7 +115,7 @@ class MusicService:
         for tag in tags:
             if tag:
                 result.extend(tag.music)
-        return result, [self._to_tag_dto(t) for t in tags]
+        return result
 
     def download(self, file: str) -> str:
         full_path = self._join_music_folder(file)
@@ -129,17 +129,17 @@ class MusicService:
     def update_tag(self, t: TagDto):
         tag = self._get_tag(t.id)
         if tag is None:
-            return False
+            raise Exception('Tag not found')
 
         tag.name = t.name
         tag.color = t.color
         db.session.commit()
 
-        return True
+        return self._to_tag_dto(tag)
 
     def tag_music(self, tag: TagDto, file: str):
         if self._join_music_folder(file) is None:
-            return 'File not found'
+            raise Exception('File not found')
 
         id = self._to_music_id(file)
         music = self._get_music(id)
@@ -156,28 +156,28 @@ class MusicService:
             tag = self._get_tag(tag.id)
 
         if tag is None:
-            return 'Tag not found'
+            raise Exception('Tag not found')
 
         music.tags.append(tag)
         db.session.commit()
 
-        return None
+        return self._to_music_item_dto(music)
 
     def untag_music(self, tag: int, file: str):
         if self._join_music_folder(file) is None:
-            return 'File not found'
+            raise Exception('File not found')
 
         id = self._to_music_id(file)
         music = self._get_music(id)
         if music is None:
-            return 'Music not found'
+            raise Exception('Music not found')
 
         music.tags = [t for t in music.tags if t.id != tag]
         self._delete_tag_if_empty(tag)
 
         db.session.commit()
 
-        return None
+        return self._to_music_item_dto(music)
 
     def _delete_tag_if_empty(self, tag: int):
         tag = self._get_tag(tag)
@@ -190,7 +190,7 @@ class MusicService:
         print(f'Delete empty tag {tag.name}')
         db.session.delete(tag)
 
-    def _get_tag(self, id: int) -> TagDto:
+    def _get_tag(self, id: int) -> Tag:
         return Tag.query.filter_by(id=id).first()
 
     def _get_music(self, file: str) -> Music:
@@ -201,5 +201,8 @@ class MusicService:
     def _to_tag_dto(self, tag: Tag) -> TagDto:
         return TagDto(id=tag.id, name=tag.name, color=tag.color)
 
-    def _to_music_item_dto(self, music: Music, tags: list[TagDto]) -> MusicItemDto:
-        return MusicItemDto(parent=os.path.dirname(music.file), is_folder=False, file=os.path.basename(music.file), tags=tags)
+    def _to_music_item_dto(self, music: Music) -> MusicItemDto:
+        return MusicItemDto(parent=os.path.dirname(music.file),
+                            is_folder=False,
+                            file=os.path.basename(music.file),
+                            tags=[self._to_tag_dto(t) for t in music.tags])

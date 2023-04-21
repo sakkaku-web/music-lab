@@ -16,6 +16,7 @@
 import * as runtime from '../runtime';
 import type {
   MusicErrorResponse,
+  MusicItemDto,
   MusicListResponse,
   MusicTagBody,
   MusicUnTagBody,
@@ -25,6 +26,8 @@ import type {
 import {
     MusicErrorResponseFromJSON,
     MusicErrorResponseToJSON,
+    MusicItemDtoFromJSON,
+    MusicItemDtoToJSON,
     MusicListResponseFromJSON,
     MusicListResponseToJSON,
     MusicTagBodyFromJSON,
@@ -66,7 +69,7 @@ export class MusicApi extends runtime.BaseAPI {
 
     /**
      */
-    async deleteMusicTagTagDeleteRaw(requestParameters: DeleteMusicTagTagDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async deleteMusicTagTagDeleteRaw(requestParameters: DeleteMusicTagTagDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<MusicItemDto>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -81,13 +84,14 @@ export class MusicApi extends runtime.BaseAPI {
             body: MusicUnTagBodyToJSON(requestParameters.musicUnTagBody),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => MusicItemDtoFromJSON(jsonValue));
     }
 
     /**
      */
-    async deleteMusicTagTagDelete(requestParameters: DeleteMusicTagTagDeleteRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.deleteMusicTagTagDeleteRaw(requestParameters, initOverrides);
+    async deleteMusicTagTagDelete(requestParameters: DeleteMusicTagTagDeleteRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MusicItemDto> {
+        const response = await this.deleteMusicTagTagDeleteRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -156,7 +160,7 @@ export class MusicApi extends runtime.BaseAPI {
 
     /**
      */
-    async updateMusicTagTagPostRaw(requestParameters: UpdateMusicTagTagPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async updateMusicTagTagPostRaw(requestParameters: UpdateMusicTagTagPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<MusicItemDto>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -171,13 +175,14 @@ export class MusicApi extends runtime.BaseAPI {
             body: MusicTagBodyToJSON(requestParameters.musicTagBody),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => MusicItemDtoFromJSON(jsonValue));
     }
 
     /**
      */
-    async updateMusicTagTagPost(requestParameters: UpdateMusicTagTagPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.updateMusicTagTagPostRaw(requestParameters, initOverrides);
+    async updateMusicTagTagPost(requestParameters: UpdateMusicTagTagPostRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MusicItemDto> {
+        const response = await this.updateMusicTagTagPostRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
