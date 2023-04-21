@@ -42,6 +42,7 @@ export function Chip({ tag, edit, onEdit, onCancel, onClick }: ChipProps) {
       {(edit && (
         <>
           <input
+            autoFocus
             value={editName}
             style={{ background: editColor, color: textColor }}
             className="outline-none rounded-full w-20"
@@ -49,7 +50,11 @@ export function Chip({ tag, edit, onEdit, onCancel, onClick }: ChipProps) {
             onKeyUp={(e) =>
               e.key === "Enter" &&
               onEdit &&
-              onEdit({ id: tag?.id, name: editName || "", color: editColor.replace("#", "") })
+              onEdit({
+                id: tag?.id,
+                name: editName || "",
+                color: editColor.replace("#", ""),
+              })
             }
           />
 
@@ -62,7 +67,10 @@ export function Chip({ tag, edit, onEdit, onCancel, onClick }: ChipProps) {
 
             {openPicker && (
               <div className="absolute top-10 -left-2">
-                <TwitterPicker color={editColor} onChange={(x) => setEditColor(x.hex)} />
+                <TwitterPicker
+                  color={editColor}
+                  onChange={(x) => setEditColor(x.hex)}
+                />
               </div>
             )}
           </div>

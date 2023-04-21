@@ -20,11 +20,11 @@ export function Folder({ parent, name }: FolderProps) {
 
   const onUpdate = (file: MusicItemDto) => {
     if (items) {
+      setSelectedFile(file);
       const index = items.findIndex((i) => i.file === file.file);
       if (index >= 0) {
         items[index] = file;
         setItems([...items]);
-        console.log(items);
       }
     }
   };
@@ -73,7 +73,7 @@ export function Folder({ parent, name }: FolderProps) {
 
       {selectedFile && (
         <Dialog open={!!selectedFile} onClose={() => setSelectedFile(null)}>
-          <div className="bg-white p-4 w-80 rounded-sm">
+          <div className="bg-white p-4 min-w-[30rem] rounded-sm">
             <File file={selectedFile} onUpdate={onUpdate} />
           </div>
         </Dialog>
