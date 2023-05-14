@@ -67,5 +67,5 @@ app.register_api(api)
 
 
 with app.app_context():
-    # db.create_all()
-    db.reflect()
+    db.create_all()
+    # db.reflect()
