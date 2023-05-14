@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from flask_openapi3 import APIBlueprint
 from flask import send_file
 import os
+from urllib.parse import unquote
 
 from app.config import music_tag
 from app.services.music import MusicItemDto, TagDto, MusicService
@@ -79,7 +80,8 @@ class MusicErrorResponse(BaseModel):
          responses={'404': MusicErrorResponse},
          extra_responses={"200": {"content": {"application/octet-stream": {"schema": {"type": "file"}}}}})
 def music_download(path: MusicDownloadPath):
-    file = music_service.download(path.file)
+    file_name = unquote(path.file)
+    file = music_service.download(file_name)
 
     if file is None:
         return MusicErrorResponse(message=f'File not found: {file}').dict(), 404

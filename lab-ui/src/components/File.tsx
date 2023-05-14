@@ -1,7 +1,7 @@
 import { FcPlus } from "react-icons/fc";
-import { MusicItemDto, TagDto } from "../openapi";
+import { BlobApiResponse, MusicItemDto, TagDto } from "../openapi";
 import { Chip } from "./Chip";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MusicApiContext } from "../music";
 
 interface FileProps {
@@ -12,8 +12,19 @@ interface FileProps {
 export function File({ file, onUpdate }: FileProps) {
   const [addNew, setAddNew] = useState(false);
   const [editingTag, setEditingTag] = useState(null as number | null);
+  const [src, setSrc] = useState("");
 
   const api = useContext(MusicApiContext);
+  const id = `${file.parent}/${file.file}`;
+
+  useEffect(() => {
+    api
+      ?.musicDownloadDownloadFileGetRaw({ file: encodeURIComponent(id) })
+      .then((res) => new BlobApiResponse(res.raw).value())
+      .then((data) => URL.createObjectURL(data))
+      .then((url) => setSrc(url))
+      .catch((error) => console.log("Failed to load file:", error));
+  }, []);
 
   const onUpdateTag = async (tag: TagDto) => {
     if (editingTag) {
@@ -35,7 +46,7 @@ export function File({ file, onUpdate }: FileProps) {
 
   const onNewTag = async (tag: TagDto) => {
     const res = await api?.updateMusicTagTagPost({
-      musicTagBody: { file: `${file.parent}/${file.file}`, tag: tag },
+      musicTagBody: { file: id, tag: tag },
     });
 
     if (res) {
@@ -59,6 +70,8 @@ export function File({ file, onUpdate }: FileProps) {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl">{file.file}</h1>
+
+      <audio controls src={src} />
 
       <div className="flex gap-2">
         {file.tags?.map((tag) => (

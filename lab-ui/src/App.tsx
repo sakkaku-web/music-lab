@@ -1,8 +1,9 @@
 import { Configuration, MusicApi } from "./openapi";
 import { Folder } from "./components/Folder";
 import { MusicApiContext } from "./music";
+import { env } from "./env";
 
-const api = new MusicApi(new Configuration({ basePath: "http://localhost:5000" }));
+const api = new MusicApi(new Configuration({ basePath: env.apiUrl }));
 
 function App() {
   return (
