@@ -1,6 +1,6 @@
 import { FcAudioFile, FcFile } from "react-icons/fc";
 import { FaPlay, FaPause } from "react-icons/fa";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { MusicApiContext, createAudioSrc } from "../music";
 
 interface FileIconProps {
@@ -11,24 +11,23 @@ const audioFile = [".mp3", ".wav", ".ogg", ".m4a", ".aac", ".wma"];
 
 export function FileIcon({ file }: FileIconProps) {
   const api = useContext(MusicApiContext);
+  const audio = useRef(null as HTMLAudioElement | null);
   const [paused, setPaused] = useState(true);
-  const [audio, setAudio] = useState(null as HTMLAudioElement | null);
+  const [src, setSrc] = useState("");
 
   const play = async () => {
-    if (!audio && api) {
+    if (!src && api) {
       const src = await createAudioSrc(api, file);
-      const a = new Audio(src);
-      a.play();
-      setAudio(a);
+      setSrc(src);
     } else {
-      audio?.play();
+      audio.current?.play();
     }
 
     setPaused(false);
   };
 
   const pause = () => {
-    audio?.pause();
+    audio.current?.pause();
     setPaused(true);
   };
 
@@ -36,10 +35,11 @@ export function FileIcon({ file }: FileIconProps) {
     return (
       <>
         <FcAudioFile />
-        <span className={audio ? "text-black" : "text-gray-300"}>
+        <span className={src ? "text-black" : "text-gray-300"}>
           {(paused && (
             <FaPlay className="cursor-pointer" onClick={() => play()} />
           )) || <FaPause className="cursor-pointer" onClick={() => pause()} />}
+          {src && <audio autoPlay ref={audio} src={src} />}
         </span>
       </>
     );
