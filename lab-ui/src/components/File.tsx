@@ -2,7 +2,7 @@ import { FcPlus } from "react-icons/fc";
 import { BlobApiResponse, MusicItemDto, TagDto } from "../openapi";
 import { Chip } from "./Chip";
 import { useContext, useEffect, useState } from "react";
-import { MusicApiContext } from "../music";
+import { MusicApiContext, createAudioSrc } from "../music";
 
 interface FileProps {
   file: MusicItemDto;
@@ -18,12 +18,9 @@ export function File({ file, onUpdate }: FileProps) {
   const id = `${file.parent}/${file.file}`;
 
   useEffect(() => {
-    api
-      ?.musicDownloadDownloadFileGetRaw({ file: encodeURIComponent(id) })
-      .then((res) => new BlobApiResponse(res.raw).value())
-      .then((data) => URL.createObjectURL(data))
-      .then((url) => setSrc(url))
-      .catch((error) => console.log("Failed to load file:", error));
+    if (api) {
+      createAudioSrc(api, id).then((src) => setSrc(src));
+    }
   }, []);
 
   const onUpdateTag = async (tag: TagDto) => {

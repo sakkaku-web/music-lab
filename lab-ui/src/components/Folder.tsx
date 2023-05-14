@@ -62,11 +62,12 @@ export function Folder({ parent, name }: FolderProps) {
               <Folder key={item.file} name={item.file} parent={fullPath} />
             ) : (
               <li key={item.file} className="flex items-center gap-2">
+                <FileIcon file={`${item.parent}/${item.file}`} />
                 <span
                   className="flex gap-2 items-center cursor-pointer p-2"
                   onClick={() => onFileClick && onFileClick(item)}
                 >
-                  <FileIcon file={item.file} /> {item.file}{" "}
+                  {item.file}{" "}
                 </span>
                 {item.tags?.map((tag) => (
                   <Chip key={tag.id} editable={false} small={true} tag={tag} />
