@@ -62,6 +62,7 @@ class MusicService:
         files = os.listdir(parent)
         result = []
 
+        files.sort()
         for file in files:
             if file.startswith('.') or file.startswith('_'):
                 continue
