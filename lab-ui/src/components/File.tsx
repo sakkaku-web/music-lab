@@ -71,7 +71,7 @@ export function File({ file, onUpdate }: FileProps) {
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl">{file.file}</h1>
 
-      <audio controls src={src} />
+      {src && <audio controls src={src} />}
 
       <div className="flex gap-2">
         {file.tags?.map((tag) => (

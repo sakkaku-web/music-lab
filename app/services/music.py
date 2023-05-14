@@ -63,6 +63,8 @@ class MusicService:
         result = []
 
         for file in files:
+            if file.startswith('.') or file.startswith('_'):
+                continue
             p = self._remove_music_folder_prefix(parent)
             music_file = self._to_music_id(os.path.join(p, file))
             music = self._get_music(music_file)
