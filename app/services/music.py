@@ -46,8 +46,9 @@ class MusicItemDto(BaseModel):
 
 
 class MusicService:
-    def __init__(self, music_folder: str):
+    def __init__(self, music_folder: str, real_folder: str):
         self.music_folder = music_folder
+        self.real_music_folder = real_folder if real_folder else music_folder
 
     def _is_folder(self, parent: str, file: str):
         return os.path.isdir(os.path.join(parent, file))
@@ -129,7 +130,15 @@ class MusicService:
         return None
 
     def get_full_path(self, file: str):
-        return self._join_music_folder(file)
+        if file.startswith('/'):
+            file = file[1:]
+
+        path = os.path.join(self.real_music_folder, file)
+
+        if path.endswith('/'):
+            path = path[:-1]
+
+        return path
 
     def update_tag(self, t: TagDto):
         tag = self._get_tag(t.id)

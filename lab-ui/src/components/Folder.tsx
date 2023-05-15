@@ -48,7 +48,9 @@ export function Folder({ parent, name }: FolderProps) {
     ev.preventDefault();
     ev.stopPropagation();
 
-    const res = await api?.getFullPathFullPathFileGet({ file: fullPath });
+    const res = await api?.getFullPathFullPathFileGet({
+      file: encodeURIComponent(fullPath),
+    });
     if (res?.fullPath) {
       navigator.clipboard.writeText(res?.fullPath);
     }

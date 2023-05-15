@@ -11,7 +11,8 @@ api = APIBlueprint('music', __name__, url_prefix='/music',
                    abp_tags=[music_tag])
 
 MUSIC_FOLDER = os.path.abspath(os.getenv('MUSIC_FOLDER'))
-music_service = MusicService(MUSIC_FOLDER)
+REAL_FOLDER = os.getenv('REAL_MUSIC_FOLDER')
+music_service = MusicService(MUSIC_FOLDER, REAL_FOLDER)
 
 
 class MusicQuery(BaseModel):
