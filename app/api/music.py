@@ -87,3 +87,12 @@ def music_download(path: MusicDownloadPath):
         return MusicErrorResponse(message=f'File not found: {file}').dict(), 404
 
     return send_file(file, as_attachment=True)
+
+
+class FullPathResponse(BaseModel):
+    full_path: str
+
+@api.get('/full-path/<file>', responses={'200': FullPathResponse})
+def get_full_path(path: MusicDownloadPath):
+    file_name = unquote(path.file)
+    return FullPathResponse(full_path=music_service.get_full_path(file_name)).dict()

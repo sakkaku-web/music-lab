@@ -15,6 +15,7 @@
 
 import * as runtime from '../runtime';
 import type {
+  FullPathResponse,
   MusicErrorResponse,
   MusicItemDto,
   MusicListResponse,
@@ -24,6 +25,8 @@ import type {
   UnprocessableEntity,
 } from '../models';
 import {
+    FullPathResponseFromJSON,
+    FullPathResponseToJSON,
     MusicErrorResponseFromJSON,
     MusicErrorResponseToJSON,
     MusicItemDtoFromJSON,
@@ -42,6 +45,10 @@ import {
 
 export interface DeleteMusicTagTagDeleteRequest {
     musicUnTagBody?: MusicUnTagBody;
+}
+
+export interface GetFullPathFullPathFileGetRequest {
+    file: string;
 }
 
 export interface MusicDownloadDownloadFileGetRequest {
@@ -91,6 +98,34 @@ export class MusicApi extends runtime.BaseAPI {
      */
     async deleteMusicTagTagDelete(requestParameters: DeleteMusicTagTagDeleteRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<MusicItemDto> {
         const response = await this.deleteMusicTagTagDeleteRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getFullPathFullPathFileGetRaw(requestParameters: GetFullPathFullPathFileGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullPathResponse>> {
+        if (requestParameters.file === null || requestParameters.file === undefined) {
+            throw new runtime.RequiredError('file','Required parameter requestParameters.file was null or undefined when calling getFullPathFullPathFileGet.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/music/full-path/{file}`.replace(`{${"file"}}`, encodeURIComponent(String(requestParameters.file))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FullPathResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getFullPathFullPathFileGet(requestParameters: GetFullPathFullPathFileGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullPathResponse> {
+        const response = await this.getFullPathFullPathFileGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

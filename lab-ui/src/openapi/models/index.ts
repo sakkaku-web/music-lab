@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './FullPathResponse';
 export * from './MusicErrorResponse';
 export * from './MusicItemDto';
 export * from './MusicListResponse';

@@ -44,11 +44,22 @@ export function Folder({ parent, name }: FolderProps) {
     }
   };
 
+  const copyPath = async (ev: React.MouseEvent) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const res = await api?.getFullPathFullPathFileGet({ file: fullPath });
+    if (res?.fullPath) {
+      navigator.clipboard.writeText(res?.fullPath);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <button
         onClick={() => toggleExpanded()}
         className="flex gap-2 items-center hover:bg-slate-100 p-2"
+        onContextMenu={copyPath}
       >
         {expanded ? <FcExpand /> : <FcNext />}
 

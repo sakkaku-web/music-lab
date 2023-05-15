@@ -94,7 +94,7 @@ class MusicService:
         if path.endswith('/'):
             path = path[:-1]
 
-        print(f'To: {path}')
+        # print(f'To: {path}')
         if not os.path.exists(path):
             return None
 
@@ -128,7 +128,9 @@ class MusicService:
 
         return None
 
-    # DB
+    def get_full_path(self, file: str):
+        return self._join_music_folder(file)
+
     def update_tag(self, t: TagDto):
         tag = self._get_tag(t.id)
         if tag is None:

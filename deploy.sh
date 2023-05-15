@@ -12,6 +12,6 @@ docker run -d --restart unless-stopped -p 8080:5000 \
     -e DATABASE_URL=sqlite:///music.db \
     --name music-lab music-lab 
 
-# cd lab-ui
-# PUBLIC_URL=/music-lab npm run build
-# sudo rm /srv/http/music-lab -r && sudo cp -r ./build /srv/http/music-lab
+cd lab-ui
+PUBLIC_URL=/music-lab npm run build
+sudo rm /srv/http/music-lab -r && sudo cp -r ./build /srv/http/music-lab
