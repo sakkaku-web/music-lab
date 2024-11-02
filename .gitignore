@@ -1,5 +1,7 @@
 music
 __pycache__
 .venv
+venv
+
 .vscode
 *.db
